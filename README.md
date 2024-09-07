@@ -22,4 +22,4 @@ This task was not too bad, I just updated each function with the information reg
 To run the code clone the repo and you can run each file in your terminal!
 
 ## Overall Thoughts
-This was my first real experience with Computer Vision. It was quite hard and I tried many different things before I had something that even remotely worked, but it was quite fun.
+This was my first real experience with Computer Vision. It was quite hard and I tried many different things before I had something that even remotely worked, but it was quite fun. The old attempts may not run properly due to some refactoring, but they are there for your enjoyment I suppose.
