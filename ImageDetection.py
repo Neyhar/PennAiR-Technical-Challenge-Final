@@ -38,31 +38,27 @@ class ImageDetection:
         # Combine the masks to cover the full red hue range
         mask = mask1 + mask2 + mask3
 
-        # Perform morphological operations to remove noise (optional)
+        # Removing Noise
         kernel = np.ones((5, 5), np.uint8)
         mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
         mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
         # Find contours from the mask
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        contours2, _ = cv2.findContours(mask3, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # contours2, _ = cv2.findContours(mask3, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        # Loop through the contours to detect rectangles
         for contour in contours:
-            # Approximate the contour to a polygon and check if it has 4 vertices
+            # Approximate the contour to a polygon
             approx = cv2.approxPolyDP(contour, 0.02 * cv2.arcLength(contour, True), True)
             
-            # Check if the approximated contour has 4 points (indicating a rectangle)
             # Compute the area of the contour to filter out small noise
             area = cv2.contourArea(contour)
-            if area > 1000:  # Threshold for minimum area (adjust as needed)
+            if area > 1000:  # Threshold for minimum area
                 # Draw the contour on the image
                 cv2.drawContours(img, [approx], 0, (0, 0, 255), 2)
-                # You can also get the bounding box if needed
-                x, y, w, h = cv2.boundingRect(approx)
 
+                # Compute the centroid of the contour using moments
                 M = cv2.moments(contour)
-
                 if M['m00'] != 0:
                     cx = int(M['m10'] / M['m00'])
                     cy = int(M['m01'] / M['m00'])
@@ -75,7 +71,8 @@ class ImageDetection:
 
                         cv2.putText(img, f"X: {X:.2f}, Y: {Y:.2f}, Z: {Z:.2f}", (cx - 50, cy - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
         return img
-
+    
+    # Overall not my smartest implementation, too many unnecessary if statements
     def findContoursSelf(self, img):
 
         K = np.array([[2564.3186869, 0, 0], 
@@ -87,18 +84,22 @@ class ImageDetection:
         f_y = K[1, 1]
 
         real_radius = 10
-
+        
+        # Convert the image to grayscale
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
+        
+        # Apply Gaussian blur to the grayscale image
         blur = cv2.GaussianBlur(gray, (3,3), 0)
 
+        # Apply binary thresholding
         _, thresh = cv2.threshold(blur, 120, 255, cv2.THRESH_BINARY)
 
         _, invthresh = cv2.threshold(blur, 170, 255, cv2.THRESH_BINARY_INV)
 
+        # Find contours using the inverted thresholded image
         contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        edges = cv2.Canny(image=blur, threshold1=100, threshold2=200)
+        # edges = cv2.Canny(image=blur, threshold1=100, threshold2=200), tried edge detection but it didn't work well
         for contour in contours:
             epsilon = 0.001 * cv2.arcLength(contour,True)
             approx = cv2.approxPolyDP(contour, epsilon, True)
@@ -114,6 +115,7 @@ class ImageDetection:
                     cv2.drawContours(img, [approx], 0, (0, 0, 255), 2)
                     M = cv2.moments(contour)
 
+                    # Compute the centroid of the contour using moments
                     if M['m00'] != 0:
                         cx = int(M['m10'] / M['m00'])
                         cy = int(M['m01'] / M['m00'])
@@ -192,6 +194,7 @@ class ImageDetection:
         f_y = K[1, 1]
 
         real_radius = 10
+
         # Convert the image to the HSV color space
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
@@ -272,14 +275,11 @@ class ImageDetection:
         # Apply a binary threshold to the difference image
         _, thresh = cv2.threshold(diff, 30, 255, cv2.THRESH_BINARY)
 
-        # Use morphological operations to remove noise
         kernel = np.ones((5, 5), np.uint8)
         cleaned = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
-        
-        # Wait for a key press and close all windows
-
         return cleaned
     
+    # This function is not used in the final implementation, but I was toying with passing a binary image, then drawing contours on the original image
     def findBinary(self, img, color):
         _, thresh = cv2.threshold(img, 120, 255, cv2.THRESH_BINARY)
         contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -291,7 +291,7 @@ class ImageDetection:
             if len(approx) == 3:
                 shape_name = "Triangle"
             elif len(approx) == 4:
-                # Check if it's a rectangle or trapezoid
+
                 (x, y, w, h) = cv2.boundingRect(approx)
                 aspectRatio = w / float(h)
                 if aspectRatio >= 0.95 and aspectRatio <= 1.05 and cv2.contourArea(contour) > 1000:
@@ -424,7 +424,7 @@ class ImageDetection:
         return img
     
     def findBlueAndTan(self, img, blackwhite):
-        # Intrinsic matrix from the camera calibration
+
         K = np.array([[2564.3186869, 0, 0], 
                     [0, 2569.70273111, 0], 
                     [0, 0, 1]])
@@ -442,7 +442,7 @@ class ImageDetection:
         upper_blue = np.array([140, 255, 255])
 
         # Define the lower and upper range for tan color in HSV
-        lower_tan = np.array([10, 0, 0])  # Adjust this range as needed
+        lower_tan = np.array([10, 0, 0])
         upper_tan = np.array([30, 255, 255])
 
         # Create masks for blue and tan colors
@@ -469,7 +469,7 @@ class ImageDetection:
             if area > 5000:
                 approx = cv2.approxPolyDP(contour, 0.02 * cv2.arcLength(contour, True), True)
                 if len(approx) != 8:
-                    cv2.drawContours(img, [approx], 0, (0, 0, 255), 2)  # Draw blue/tan contours in red
+                    cv2.drawContours(img, [approx], 0, (0, 0, 255), 2)
                     M = cv2.moments(contour)
 
                     if M['m00'] != 0:
@@ -487,7 +487,7 @@ class ImageDetection:
         return img
     
     def findBlueAndTanIn3D(self, img, blackwhite):
-        # Intrinsic matrix from the camera calibration
+
         K = np.array([[2564.3186869, 0, 0], 
                     [0, 2569.70273111, 0], 
                     [0, 0, 1]])
@@ -504,7 +504,7 @@ class ImageDetection:
         upper_blue = np.array([140, 255, 255])
 
         # Define the lower and upper range for tan color in HSV
-        lower_tan = np.array([10, 0, 0])  # Adjust this range as needed
+        lower_tan = np.array([10, 0, 0])
         upper_tan = np.array([30, 255, 255])
 
         # Create masks for blue and tan colors
@@ -538,7 +538,7 @@ class ImageDetection:
 
                 approx = cv2.approxPolyDP(contour, 0.02 * cv2.arcLength(contour, True), True)
                 
-                cv2.drawContours(img, [approx], 0, (0, 0, 255), 2)  # Draw blue/tan contours in red
+                cv2.drawContours(img, [approx], 0, (0, 0, 255), 2) 
                 M = cv2.moments(contour)
 
                 if M['m00'] != 0:
