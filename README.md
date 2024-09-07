@@ -17,3 +17,7 @@ This task was very hard and as you will see in the example it did not work perfe
 
 ## Task 4
 This task was not too bad, I just updated each function with the information regarding distance. Sometimes there are overlapping numbers on the same shape, because in my implementation, sometimes shapes are identified by different algorithms and thus marked twice.
+
+## Running
+
+To run the code clone the repo and you can run each file in your terminal!
