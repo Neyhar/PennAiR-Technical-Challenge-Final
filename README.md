@@ -1,4 +1,4 @@
-# Hello! This is my PennAiR Technical Challenge!
+# Hello, this is my PennAiR Technical Challenge!
 
 ## Task 1
 You can see my results for Task 1 below!
