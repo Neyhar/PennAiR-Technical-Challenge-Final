@@ -19,5 +19,7 @@ This task was very hard and as you will see in the example it did not work perfe
 This task was not too bad, I just updated each function with the information regarding distance. Sometimes there are overlapping numbers on the same shape, because in my implementation, sometimes shapes are identified by different algorithms and thus marked twice.
 
 ## Running
-
 To run the code clone the repo and you can run each file in your terminal!
+
+## Overall Thoughts
+This was my first real experience with Computer Vision. It was quite hard and I tried many different things before I had something that even remotely worked, but it was quite fun.
